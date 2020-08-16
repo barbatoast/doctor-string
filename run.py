@@ -105,13 +105,17 @@ def parse_javadoc(javadoc):
     lines = remove_lines(lines, ' * ')
     lines = strip_lines(lines, ' * ')
 
+    name_tag = ''
     brief_tag = ''
     desc_tag = ''
     param_tags = []
     return_tag = ''
 
     for line in lines:
-        if '@brief' in line:
+        if '@name' in line:
+            ret = line.split(maxsplit=1)
+            name_tag = ret[1]
+        elif '@brief' in line:
             ret = line.split(maxsplit=1)
             brief_tag = ret[1]
         elif '@param' in line:
@@ -128,6 +132,7 @@ def parse_javadoc(javadoc):
                 desc_tag = desc_tag + ' ' + line
 
     javadoc_tags = {
+        'name_tag': name_tag,
         'brief_tag': brief_tag,
         'desc_tag': desc_tag,
         'param_tags': param_tags,
@@ -160,7 +165,7 @@ class Doctor:
 
             # add buttons
             for tags in tags_list:
-                self.doc.write(DOC_BUTTON % (' ' * 0, tags['brief_tag'], tags['brief_tag']))
+                self.doc.write(DOC_BUTTON % (' ' * 0, tags['name_tag'], tags['name_tag']))
             self.doc.write(DOC_DIV_CLOSE % (' ' * 2))
 
             # add intorduction
@@ -168,8 +173,11 @@ class Doctor:
 
             # add pages
             for tags in tags_list:
-                self.doc.write(DOC_PAGE_ID % (tags['brief_tag'], tags['brief_tag']))
-                self.doc.write(DOC_PAGE_DESC % (' ' * 2, tags['desc_tag']))
+                self.doc.write(DOC_PAGE_ID % (tags['name_tag'], tags['name_tag']))
+                if len(tags['brief_tag']) > 0:
+                    self.doc.write(DOC_PAGE_DESC % (' ' * 2, tags['brief_tag']))
+                if len(tags['desc_tag']) > 0:
+                    self.doc.write(DOC_PAGE_DESC % (' ' * 2, tags['desc_tag']))
                 if len(tags['param_tags']) > 0:
                     # add params
                     self.doc.write(DOC_TABLE % (' ' * 2))
