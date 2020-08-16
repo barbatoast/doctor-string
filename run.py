@@ -3,6 +3,8 @@
 import os
 import re
 
+from pyclibrary import CParser
+
 DOC_HEADER = \
 """
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
@@ -147,6 +149,11 @@ class Doctor:
         self.doc = open('doc/index.html', 'w')
         self.doc.write(DOC_HEADER)
 
+    def parse_definitions(self):
+        headers = (f for f in self.file_list if '.h' in f)
+        parser = CParser(list(headers))
+        print(parser)
+
     def parse_javadoc(self):
         headers = (f for f in self.file_list if '.h' in f)
         for header in headers:
@@ -197,6 +204,7 @@ class Doctor:
 
 def main():
     doctor = Doctor(os.listdir('.'))
+    doctor.parse_definitions()
     doctor.parse_javadoc()
     doctor.cleanup()
 
