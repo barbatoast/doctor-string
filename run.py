@@ -46,9 +46,9 @@ function displayDesc(e,d){
 </html>
 """
 
-DOC_BUTTON = '<button class="item level2" onclick="displayDesc(event,\'%s\')">%s</button>\n'
+DOC_BUTTON = '%s<button class="item level2" onclick="displayDesc(event,\'%s\')">%s</button>\n'
 
-DOC_DIV_CLOSE = '</div>\n'
+DOC_DIV_CLOSE = '%s</div>\n'
 
 DOC_INTRO = \
 """
@@ -76,12 +76,12 @@ DOC_PAGE_ID = \
   <div class="synopsis">//TODO</div>
 """
 
-DOC_PAGE_DESC = '<p class="desc-text">%s</p>\n'
+DOC_PAGE_DESC = '%s<p class="desc-text">%s</p>\n'
 
-DOC_TABLE = '<table class="params">\n'
-DOC_TABLE_ROW = '<tr><td><span class="param">%s</span></td><td>%s</td></tr>\n'
-DOC_TABLE_ROW_RETURN = '<tr><td class="returns">Returns:</td><td>%s</td></tr>'
-DOC_TABLE_CLOSE = '</table>\n'
+DOC_TABLE = '%s<table class="params">\n'
+DOC_TABLE_ROW = '%s<tr><td><span class="param">%s</span></td><td>%s</td></tr>\n'
+DOC_TABLE_ROW_RETURN = '%s<tr><td class="returns">Returns:</td><td>%s</td></tr>'
+DOC_TABLE_CLOSE = '%s</table>\n'
 
 def remove_lines(lines, value):
     while True:
@@ -160,8 +160,8 @@ class Doctor:
 
             # add buttons
             for tags in tags_list:
-                self.doc.write(DOC_BUTTON % (tags['brief_tag'], tags['brief_tag']))
-            self.doc.write('  ' + DOC_DIV_CLOSE)
+                self.doc.write(DOC_BUTTON % (' ' * 0, tags['brief_tag'], tags['brief_tag']))
+            self.doc.write(DOC_DIV_CLOSE % (' ' * 2))
 
             # add intorduction
             self.doc.write(DOC_INTRO)
@@ -169,16 +169,17 @@ class Doctor:
             # add pages
             for tags in tags_list:
                 self.doc.write(DOC_PAGE_ID % (tags['brief_tag'], tags['brief_tag']))
-                self.doc.write('  ' + (DOC_PAGE_DESC % (tags['desc_tag'])))
+                self.doc.write(DOC_PAGE_DESC % (' ' * 2, tags['desc_tag']))
                 if len(tags['param_tags']) > 0:
                     # add params
-                    self.doc.write('  ' + DOC_TABLE)
+                    self.doc.write(DOC_TABLE % (' ' * 2))
                     for param_tuple in tags['param_tags']:
-                        self.doc.write('    ' + (DOC_TABLE_ROW % param_tuple))
+                        param_name, param_desc = param_tuple
+                        self.doc.write(DOC_TABLE_ROW % (' ' * 4, param_name, param_desc))
                     if tags['return_tag'] != '':
-                        self.doc.write('    ' + (DOC_TABLE_ROW_RETURN % (tags['return_tag'])))
-                    self.doc.write('  ' + DOC_TABLE_CLOSE)
-                self.doc.write(DOC_DIV_CLOSE)
+                        self.doc.write(DOC_TABLE_ROW_RETURN % (' ' * 4, tags['return_tag']))
+                    self.doc.write(DOC_TABLE_CLOSE % (' ' * 2))
+                self.doc.write(DOC_DIV_CLOSE % (' ' * 2))
 
         self.doc.write(DOC_FOOTER)
 
