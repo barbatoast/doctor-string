@@ -23,6 +23,7 @@ DOC_HEADER = \
 
     <span class="cat">Types</span>
 """
+
 DOC_FOOTER = \
 """
 </div>
