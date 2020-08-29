@@ -149,6 +149,7 @@ class Doctor:
         self.file_list = file_list
         self.doc = open('doc/index.html', 'w')
         self.doc.write(DOC_HEADER)
+        self.tags_list = []
 
     def parse_definitions(self):
         headers = (f for f in self.file_list if '.h' in f)
@@ -166,37 +167,37 @@ class Doctor:
             if match is None:
                 return
 
-            tags_list = []
             javadocs = (f for f in match if '@file' not in f[0])
             for javadoc in javadocs:
-                tags_list.append(parse_javadoc(javadoc[0]))
+                self.tags_list.append(parse_javadoc(javadoc[0]))
 
-            # add buttons
-            for tags in tags_list:
-                self.doc.write(DOC_BUTTON % (' ' * 0, tags['name_tag'], tags['name_tag']))
+    def write_html(self):
+        # add buttons
+        for tags in self.tags_list:
+            self.doc.write(DOC_BUTTON % (' ' * 0, tags['name_tag'], tags['name_tag']))
+        self.doc.write(DOC_DIV_CLOSE % (' ' * 2))
+
+        # add intorduction
+        self.doc.write(DOC_INTRO)
+
+        # add pages
+        for tags in self.tags_list:
+            self.doc.write(DOC_PAGE_ID % (tags['name_tag'], tags['name_tag']))
+            if len(tags['brief_tag']) > 0:
+                self.doc.write(DOC_PAGE_DESC % (' ' * 2, tags['brief_tag']))
+            if len(tags['desc_tag']) > 0:
+                self.doc.write(DOC_PAGE_DESC % (' ' * 2, tags['desc_tag']))
+            if len(tags['param_tags']) > 0:
+                # add params
+                self.doc.write(DOC_TABLE % (' ' * 2))
+                for param_tuple in tags['param_tags']:
+                    param_name, param_desc = param_tuple
+                    self.doc.write(DOC_TABLE_ROW % (' ' * 4, param_name, param_desc))
+                for return_tuple in tags['return_tags']:
+                    return_type, return_desc = return_tuple
+                    self.doc.write(DOC_TABLE_ROW_RETURN % (' ' * 4, return_type, return_desc))
+                self.doc.write(DOC_TABLE_CLOSE % (' ' * 2))
             self.doc.write(DOC_DIV_CLOSE % (' ' * 2))
-
-            # add intorduction
-            self.doc.write(DOC_INTRO)
-
-            # add pages
-            for tags in tags_list:
-                self.doc.write(DOC_PAGE_ID % (tags['name_tag'], tags['name_tag']))
-                if len(tags['brief_tag']) > 0:
-                    self.doc.write(DOC_PAGE_DESC % (' ' * 2, tags['brief_tag']))
-                if len(tags['desc_tag']) > 0:
-                    self.doc.write(DOC_PAGE_DESC % (' ' * 2, tags['desc_tag']))
-                if len(tags['param_tags']) > 0:
-                    # add params
-                    self.doc.write(DOC_TABLE % (' ' * 2))
-                    for param_tuple in tags['param_tags']:
-                        param_name, param_desc = param_tuple
-                        self.doc.write(DOC_TABLE_ROW % (' ' * 4, param_name, param_desc))
-                    for return_tuple in tags['return_tags']:
-                        return_type, return_desc = return_tuple
-                        self.doc.write(DOC_TABLE_ROW_RETURN % (' ' * 4, return_type, return_desc))
-                    self.doc.write(DOC_TABLE_CLOSE % (' ' * 2))
-                self.doc.write(DOC_DIV_CLOSE % (' ' * 2))
 
         self.doc.write(DOC_FOOTER)
 
@@ -208,6 +209,7 @@ def main():
     doctor = Doctor(os.listdir('.'))
     doctor.parse_definitions()
     doctor.parse_javadoc()
+    doctor.write_html()
     doctor.cleanup()
 
 if __name__ == '__main__':
