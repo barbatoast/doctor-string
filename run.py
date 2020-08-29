@@ -82,7 +82,7 @@ DOC_PAGE_DESC = '%s<p class="desc-text">%s</p>\n'
 
 DOC_TABLE = '%s<table class="params">\n'
 DOC_TABLE_ROW = '%s<tr><td><span class="param">%s</span></td><td>%s</td></tr>\n'
-DOC_TABLE_ROW_RETURN = '%s<tr><td class="returns">Returns:</td><td>%s</td></tr>'
+DOC_TABLE_ROW_RETURN = '%s<tr><td class="returns">Returns:</td><td>%s</td><td>%s</td></tr>\n'
 DOC_TABLE_CLOSE = '%s</table>\n'
 
 def remove_lines(lines, value):
@@ -111,7 +111,7 @@ def parse_javadoc(javadoc):
     brief_tag = ''
     desc_tag = ''
     param_tags = []
-    return_tag = ''
+    return_tags = []
 
     for line in lines:
         if '@name' in line:
@@ -125,8 +125,9 @@ def parse_javadoc(javadoc):
             del ret[0]
             param_tags.append(tuple(ret))
         elif '@return' in line:
-            ret = line.split(maxsplit=1)
-            return_tag = ret[1]
+            ret = line.split(maxsplit=2)
+            del ret[0]
+            return_tags.append(tuple(ret))
         else:
             if desc_tag == '':
                 desc_tag = line
@@ -138,7 +139,7 @@ def parse_javadoc(javadoc):
         'brief_tag': brief_tag,
         'desc_tag': desc_tag,
         'param_tags': param_tags,
-        'return_tag': return_tag,
+        'return_tags': return_tags,
     }
 
     return javadoc_tags
@@ -191,8 +192,9 @@ class Doctor:
                     for param_tuple in tags['param_tags']:
                         param_name, param_desc = param_tuple
                         self.doc.write(DOC_TABLE_ROW % (' ' * 4, param_name, param_desc))
-                    if tags['return_tag'] != '':
-                        self.doc.write(DOC_TABLE_ROW_RETURN % (' ' * 4, tags['return_tag']))
+                    for return_tuple in tags['return_tags']:
+                        return_type, return_desc = return_tuple
+                        self.doc.write(DOC_TABLE_ROW_RETURN % (' ' * 4, return_type, return_desc))
                     self.doc.write(DOC_TABLE_CLOSE % (' ' * 2))
                 self.doc.write(DOC_DIV_CLOSE % (' ' * 2))
 
